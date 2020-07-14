@@ -12,6 +12,8 @@ RSpec.describe "Risk Profile Calculator", :type => :request do
         vehicle: {"year": 2018}
     }
 
+    binding.pry
+
     expect(response).to have_http_status(:ok)
     expect(response.body).to include("")
   end
