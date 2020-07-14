@@ -1,7 +1,7 @@
 require "rails_helper"
 
 RSpec.describe "Risk Profile Calculator", :type => :request do
-  it "" do
+  it "receives user data and returns insurance profile" do
     post "/calculator", params: {
         age: 35,
         dependents: 2,
@@ -12,9 +12,14 @@ RSpec.describe "Risk Profile Calculator", :type => :request do
         vehicle: {"year": 2018}
     }
 
-    binding.pry
+    json = {
+        auto: 'regular',
+        disability: 'ineligible',
+        home: 'regular',
+        life: 'regular'
+    }.to_json
 
     expect(response).to have_http_status(:ok)
-    expect(response.body).to include("")
+    expect(response.body).to eq(json)
   end
 end

@@ -4,14 +4,14 @@ class CalculatorController < ApplicationController
     def create
         @params = params.to_unsafe_h
 
-        json = {
+        scores = {
             auto: final_score(auto_score),
             disability: final_score(disability_score),
             home: final_score(home_score),
             life: final_score(life_score),
         }
 
-        render json, status: :ok
+        render json: scores, status: :ok
     end
 
     private
