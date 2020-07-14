@@ -2,66 +2,77 @@ class CalculatorController < ApplicationController
     # TO DO - include validation here with dry-validation gem
 
     def create
+        @params = params.to_unsafe_h
+        auto = final_score(auto_score)
+        disability = final_score(disability_score)
+        home = final_score(home_score)
+        life =final_score(life_score)
+
         render status: :ok
-#       render json {
-#    		auto: final_score(auto_score)
-#	    	disability: final_score(disability_score)
-#    		home: final_score(home_score)
-#	    	life: final_score(life_score)
-#	    }, status: :ok
+#        render json{
+#            auto: final_score(auto_score),
+#            disability: final_score(disability_score),
+#            home: final_score(home_score),
+#            life: final_score(life_score),
+#        }, status: :ok
     end
 
     private
 
     def final_score(score)
+        'ineligible' if score == false
         'economic' if score <= 0
-	    'regular' if score == (1 or 2)
-	    'responsible' if score >= 3
+	    'regular' if (score == 1) || (score == 2)
+        'responsible' if score >= 3
     end
 
     def base_score
-        # sum elements in array of risk_question
-    end
-
-    def life_score
-        # 'ineligible' if age > 60
-        # base_score + age_risk + income_risk + dependents_risk
-        # + 1 point if user is married
-    end
-
-    def disability_score
-        # 'ineligible' if user does not have income
-        # base_score + age_risk + income_risk + dependents_risk + morgaged_house
-        # - 1 point if user is married
-    end
-
-    def home_score
-        # 'ineligible' if user does not have a house
-        # base_score + age_risk + income_risk + morgaged_house
-    end
-
-    def auto_score
-        # 'ineligible' if user does not have a car
-        # base_score + age_risk + income_risk
-        # + 1 point if car year in the last 5 years
+        params["risk_questions"].map(&:to_i).sum
     end
 
     def age_risk
-        # - 2 points if user is under 30
-        # - 1 point if user age is between 30 and 40
+        age = @params['age'].to_i
+        -2 if age < 30
+        -1 if age >= 30 && age <=40
+        0
     end
 
     def income_risk
-        # - 1 risk point if user income is above 200k
-        
+        -1 if @params['income'].to_i > 200000
+        0
     end
 
     def dependents_risk
-        # + 1 point if user has dependents
+        1 if @params['dependents'].to_i > 0
+        0
     end
 
-    def morgaged_house
-        # + 1 point if house == mortgaged    
+    def mortgaged_house
+        1 if @params['house']['ownership_status'] == 'mortgaged'
+        0  
+    end
+
+    def life_score
+        false if @params['age'].to_i > 60
+        score = base_score + age_risk + income_risk + dependents_risk 
+        score + 1 if @params['marital_status'] == 'married' 
+    end
+
+    def disability_score
+        false if @params['income'] == 0
+        score = base_score + age_risk + income_risk + dependents_risk + mortgaged_house 
+        score - 1 if @params['marital_status'] == 'married'
+    end
+
+    def home_score
+        false if @params['house'] == nil
+        score = base_score + age_risk + income_risk + mortgaged_house
+    end
+
+    def auto_score
+        false if @params['vehicle'] == nil
+        score = base_score + age_risk + income_risk
+        score + 1 if @params['vehicle']['year'].to_i > Date.today.year-5 #if car year in the last 5 years
     end
 
 end
