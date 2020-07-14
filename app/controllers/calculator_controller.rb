@@ -17,7 +17,7 @@ class CalculatorController < ApplicationController
     private
 
     def final_score(score)
-        return 'ineligible' if (score == false) || score == nil
+        return 'ineligible' if (score == false) || (score == nil)
         return 'economic' if score <= 0
 	    return 'regular' if (score == 1) || (score == 2)
         return 'responsible' if score >= 3
@@ -46,7 +46,8 @@ class CalculatorController < ApplicationController
     end
 
     def mortgaged_house
-        1 if @params['house']['ownership_status'] == 'mortgaged'
+        house = @params['house']
+        1 if house.present? && house['ownership_status'] == 'mortgaged'
         0  
     end
 
